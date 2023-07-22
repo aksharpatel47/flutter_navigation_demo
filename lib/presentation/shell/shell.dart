@@ -6,9 +6,9 @@ import '../../dependencies.dart';
 import 'shell.bloc.dart';
 
 class ShellScreen extends StatelessWidget {
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
-  const ShellScreen({super.key, required this.child});
+  const ShellScreen({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +16,15 @@ class ShellScreen extends StatelessWidget {
       create: (context) => getIt<ShellBloc>(),
       child: BlocConsumer<ShellBloc, ShellBlocState>(
         listener: (context, state) {
-          switch (state.currentIndex) {
-            case 0:
-              context.go("/page1");
-              break;
-            case 1:
-              context.go("/page2");
-              break;
-          }
+          navigationShell.goBranch(
+            state.currentIndex,
+            initialLocation: state.currentIndex == navigationShell.currentIndex,
+          );
         },
         builder: (context, state) {
           return ShellPage(
             state: state,
-            child: child,
+            child: navigationShell,
           );
         },
       ),
@@ -53,13 +49,15 @@ class ShellPage extends StatelessWidget {
       body: Stack(
         children: [
           child,
-          state.modalData == null ? ShellBottomNavigationBar(state: state) : Container(
-            padding: const EdgeInsets.all(16),
-            alignment: Alignment.bottomCenter,
-            child: Text(
-              "Modal: ${state.modalData}",
-            ),
-          )
+          state.modalData == null
+              ? ShellBottomNavigationBar(state: state)
+              : Container(
+                  padding: const EdgeInsets.all(16),
+                  alignment: Alignment.bottomCenter,
+                  child: Text(
+                    "Modal: ${state.modalData}",
+                  ),
+                )
         ],
       ),
     );
